@@ -40,6 +40,7 @@ public class AverageDailyRateChartConfiguration extends ChartConfiguration {
         setType(ChartType.LINE);
         
 		Options options = new Options()
+				.setMaintainAspectRatio(false)
 				.setResponsive(true)
 				.setLegend(new Legend()
 						.setDisplay(false))
@@ -48,10 +49,16 @@ public class AverageDailyRateChartConfiguration extends ChartConfiguration {
 								.setDisplay(true)
 								.setTicks(new Ticks()
 										.setBeginAtZero(true)
-										.setSuggestedMin(0)))
+										.setSuggestedMin(0)
+										.setFontFamily(ChartStyling.getFontFamily())
+										.setFontSize(ChartStyling.getFontSize())
+										.setMaxTicksLimit(5)
+										))
 						.setXAxes(new AxesScale()
 								.setTicks(new Ticks()
 										.setCallback(new CallbackFunction("function(dataLabel, index) {return index % 2 === 0 ? dataLabel : '';}"))
+										.setFontFamily(ChartStyling.getFontFamily())
+										.setFontSize(ChartStyling.getFontSize())
 										)
 								.setGridLines(new GridLines()
 										.setDisplay(false))));

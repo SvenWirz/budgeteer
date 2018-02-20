@@ -19,4 +19,12 @@ public class ChartStyling {
                 new RgbColor(245, 105, 84)
                 );
 	}
+
+	public static String getFontFamily() {
+		return "Verdana";
+	}
+	
+	public static Number getFontSize() {
+		return 10;
+	}
 }

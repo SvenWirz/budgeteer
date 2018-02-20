@@ -49,6 +49,7 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
     			);
     	
 		Options options = new Options()
+				.setMaintainAspectRatio(false)
 				.setResponsive(true)
 				.setLegend(new Legend()
 						.setDisplay(false))
@@ -56,9 +57,15 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
 						.setYAxes(new AxesScale()
 								.setDisplay(true)
 								.setTicks(new Ticks()
+										.setFontFamily(ChartStyling.getFontFamily())
+										.setFontSize(ChartStyling.getFontSize())
 										.setBeginAtZero(true)
-										.setSuggestedMin(0)))
+										.setSuggestedMin(0)
+										.setMaxTicksLimit(5)))
 						.setXAxes(new AxesScale()
+								.setTicks(new Ticks()
+										.setFontFamily(ChartStyling.getFontFamily())
+										.setFontSize(ChartStyling.getFontSize()))
 								.setGridLines(new GridLines()
 										.setDisplay(false))));
 		
