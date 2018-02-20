@@ -11,7 +11,9 @@ import org.wickedsource.budgeteer.web.pages.base.basepage.breadcrumbs.Breadcrumb
 import org.wickedsource.budgeteer.web.pages.budgets.overview.BudgetsOverviewPage;
 import org.wickedsource.budgeteer.web.pages.contract.overview.ContractOverviewPage;
 import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBudgetChart;
+import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBudgetChartConfiguration;
 import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBudgetChartModel;
+import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBudgetChartjs;
 import org.wickedsource.budgeteer.web.pages.dashboard.dailyratechart.AverageDailyRateChart;
 import org.wickedsource.budgeteer.web.pages.dashboard.dailyratechart.AverageDailyRateChartModel;
 import org.wickedsource.budgeteer.web.pages.hours.HoursPage;
@@ -25,8 +27,9 @@ public class DashboardPage extends BasePage {
     public DashboardPage() {
         BudgeteerChartTheme theme = new BudgeteerChartTheme();
         BurnedBudgetChartModel burnedBudgetModel = new BurnedBudgetChartModel(BudgeteerSession.get().getProjectId(), 8);
-        add(new BurnedBudgetChart("burnedBudgetChart", burnedBudgetModel, theme));
-
+//        add(new BurnedBudgetChart("burnedBudgetChart", burnedBudgetModel, theme));
+        add(new BurnedBudgetChartjs("burnedBudgetChart", burnedBudgetModel, new BurnedBudgetChartConfiguration(burnedBudgetModel)));
+        
         add(new Label("username", new UsernameModel()));
 
         add(new Label("projectname", new ProjectnameModel()));
