@@ -11,7 +11,6 @@ import de.adesso.wickedcharts.chartjs.chartoptions.Legend;
 import de.adesso.wickedcharts.chartjs.chartoptions.Options;
 import de.adesso.wickedcharts.chartjs.chartoptions.Scales;
 import de.adesso.wickedcharts.chartjs.chartoptions.Ticks;
-import de.adesso.wickedcharts.chartjs.chartoptions.colors.RgbColor;
 import de.adesso.wickedcharts.chartjs.chartoptions.label.Label;
 import de.adesso.wickedcharts.chartjs.chartoptions.label.TextLabel;
 import de.adesso.wickedcharts.chartjs.chartoptions.valueType.DoubleValue;
@@ -20,6 +19,7 @@ import org.apache.wicket.injection.Injector;
 import org.wickedsource.budgeteer.MoneyUtil;
 import org.wickedsource.budgeteer.web.BudgeteerSession;
 import org.wickedsource.budgeteer.web.PropertyLoader;
+import org.wickedsource.budgeteer.web.charts.ChartStyling;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +27,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class AverageDailyRateChartConfiguration extends ChartConfiguration {
 
@@ -58,11 +59,10 @@ public class AverageDailyRateChartConfiguration extends ChartConfiguration {
 		
 		Dataset dataset1 = new Dataset()
 				.setFill(false)
-				.setBackgroundColor(new RgbColor(0, 192, 239))
-				.setBorderColor(new RgbColor(0, 192, 239))
+				.setBackgroundColor(ChartStyling.getColors().get(0))
+				.setBorderColor(ChartStyling.getColors().get(0))
 				.setData(DoubleValue.of(MoneyUtil.toDouble(model.getObject(), BudgeteerSession.get().getSelectedBudgetUnit())))
-				.setLabel(PropertyLoader.getProperty(AverageDailyRateChart.class, "chart.seriesName"))
-				;
+				.setLabel(PropertyLoader.getProperty(AverageDailyRateChart.class, "chart.seriesName"));
 		
 		setData(new Data()
 				.setDatasets(Arrays.asList(dataset1))
@@ -71,7 +71,7 @@ public class AverageDailyRateChartConfiguration extends ChartConfiguration {
     }
     
     private List<Label> getLabels(int numberOfDays, String dateFormat) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat,Locale.ENGLISH);
     	ArrayList<Label> list = new ArrayList<Label>(numberOfDays);
     	LocalDateTime nowDate = LocalDateTime.now();
     	for(int i = 0; i < numberOfDays; i++) {

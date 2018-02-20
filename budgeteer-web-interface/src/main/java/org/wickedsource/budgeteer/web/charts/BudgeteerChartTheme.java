@@ -18,7 +18,7 @@ public class BudgeteerChartTheme extends Theme {
                 new HexColor("#001f3f"),
                 new HexColor("#39cccc"),
                 new HexColor("#3d9970"),
-                new HexColor("#3d9970"),
+                new HexColor("#3d9970"), // Double value
                 new HexColor("#f56954"));
 
         setCredits(new CreditOptions().setEnabled(false));

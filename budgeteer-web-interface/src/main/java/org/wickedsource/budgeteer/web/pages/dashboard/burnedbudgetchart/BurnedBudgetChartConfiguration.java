@@ -7,6 +7,7 @@ import java.util.List;
 import org.wickedsource.budgeteer.MoneyUtil;
 import org.wickedsource.budgeteer.web.BudgeteerSession;
 import org.wickedsource.budgeteer.web.PropertyLoader;
+import org.wickedsource.budgeteer.web.charts.ChartStyling;
 import org.wickedsource.budgeteer.web.charts.ChartUtils;
 
 import de.adesso.wickedcharts.chartjs.ChartConfiguration;
@@ -19,7 +20,6 @@ import de.adesso.wickedcharts.chartjs.chartoptions.Legend;
 import de.adesso.wickedcharts.chartjs.chartoptions.Options;
 import de.adesso.wickedcharts.chartjs.chartoptions.Scales;
 import de.adesso.wickedcharts.chartjs.chartoptions.Ticks;
-import de.adesso.wickedcharts.chartjs.chartoptions.colors.RgbColor;
 import de.adesso.wickedcharts.chartjs.chartoptions.label.TextLabel;
 import de.adesso.wickedcharts.chartjs.chartoptions.valueType.DoubleValue;
 
@@ -38,7 +38,7 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
 
     	
     	Dataset dataset = new Dataset()
-    			.setBackgroundColor(new RgbColor(0, 192, 239))
+    			.setBackgroundColor(ChartStyling.getColors().get(0))
     			.setData(DoubleValue.of(MoneyUtil.toDouble(model.getObject(), BudgeteerSession.get().getSelectedBudgetUnit())))
     			.setLabel(PropertyLoader.getProperty(BurnedBudgetChart.class, "chart.seriesName"));
     			
