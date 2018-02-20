@@ -16,6 +16,7 @@ import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBu
 import org.wickedsource.budgeteer.web.pages.dashboard.burnedbudgetchart.BurnedBudgetChartjs;
 import org.wickedsource.budgeteer.web.pages.dashboard.dailyratechart.AverageDailyRateChart;
 import org.wickedsource.budgeteer.web.pages.dashboard.dailyratechart.AverageDailyRateChartModel;
+import org.wickedsource.budgeteer.web.pages.dashboard.dailyratechart.AverageDailyRateChartjs;
 import org.wickedsource.budgeteer.web.pages.hours.HoursPage;
 import org.wickedsource.budgeteer.web.pages.imports.ImportsOverviewPage;
 import org.wickedsource.budgeteer.web.pages.invoice.overview.InvoiceOverviewPage;
@@ -25,7 +26,7 @@ import org.wickedsource.budgeteer.web.pages.person.overview.PeopleOverviewPage;
 public class DashboardPage extends BasePage {
 
     public DashboardPage() {
-        BudgeteerChartTheme theme = new BudgeteerChartTheme();
+        //BudgeteerChartTheme theme = new BudgeteerChartTheme();
         BurnedBudgetChartModel burnedBudgetModel = new BurnedBudgetChartModel(BudgeteerSession.get().getProjectId(), 8);
 //        add(new BurnedBudgetChart("burnedBudgetChart", burnedBudgetModel, theme));
         add(new BurnedBudgetChartjs("burnedBudgetChart", burnedBudgetModel, new BurnedBudgetChartConfiguration(burnedBudgetModel)));
@@ -35,8 +36,8 @@ public class DashboardPage extends BasePage {
         add(new Label("projectname", new ProjectnameModel()));
 
         AverageDailyRateChartModel avgDailyRateModel = new AverageDailyRateChartModel(BudgeteerSession.get().getProjectId(), 30);
-        add(new AverageDailyRateChart("averageDailyRateChart", avgDailyRateModel, theme));
-
+//        add(new AverageDailyRateChart("averageDailyRateChart", avgDailyRateModel, theme));
+        add(new AverageDailyRateChartjs("averageDailyRateChart", avgDailyRateModel));
         add(new BookmarkablePageLink<PeopleOverviewPage>("peopleLink", PeopleOverviewPage.class));
 
         add(new BookmarkablePageLink<HoursPage>("hoursLink", HoursPage.class));

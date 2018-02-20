@@ -14,12 +14,12 @@ import de.adesso.wickedcharts.chartjs.chartoptions.AxesScale;
 import de.adesso.wickedcharts.chartjs.chartoptions.ChartType;
 import de.adesso.wickedcharts.chartjs.chartoptions.Data;
 import de.adesso.wickedcharts.chartjs.chartoptions.Dataset;
+import de.adesso.wickedcharts.chartjs.chartoptions.GridLines;
 import de.adesso.wickedcharts.chartjs.chartoptions.Legend;
 import de.adesso.wickedcharts.chartjs.chartoptions.Options;
-import de.adesso.wickedcharts.chartjs.chartoptions.Rectangle;
 import de.adesso.wickedcharts.chartjs.chartoptions.Scales;
 import de.adesso.wickedcharts.chartjs.chartoptions.Ticks;
-import de.adesso.wickedcharts.chartjs.chartoptions.colors.RgbaColor;
+import de.adesso.wickedcharts.chartjs.chartoptions.colors.RgbColor;
 import de.adesso.wickedcharts.chartjs.chartoptions.label.TextLabel;
 import de.adesso.wickedcharts.chartjs.chartoptions.valueType.DoubleValue;
 
@@ -38,8 +38,7 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
 
     	
     	Dataset dataset = new Dataset()
-    			.setBackgroundColor(new RgbaColor(0, 192, 239,0.5f))
-    			.setBorderColor(new RgbaColor(0, 192, 239,1.0f))
+    			.setBackgroundColor(new RgbColor(0, 192, 239))
     			.setData(DoubleValue.of(MoneyUtil.toDouble(model.getObject(), BudgeteerSession.get().getSelectedBudgetUnit())))
     			.setLabel(PropertyLoader.getProperty(BurnedBudgetChart.class, "chart.seriesName"));
     			
@@ -51,7 +50,6 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
     	
 		Options options = new Options()
 				.setResponsive(true)
-				.setElements(new Rectangle())
 				.setLegend(new Legend()
 						.setDisplay(false))
 				.setScales(new Scales()
@@ -59,8 +57,11 @@ public class BurnedBudgetChartConfiguration extends ChartConfiguration implement
 								.setDisplay(true)
 								.setTicks(new Ticks()
 										.setBeginAtZero(true)
-										.setSuggestedMin(0)
-										)));
+										.setSuggestedMin(0)))
+						.setXAxes(new AxesScale()
+								.setGridLines(new GridLines()
+										.setDisplay(false))));
+		
 		setOptions(options);
     	
     	
