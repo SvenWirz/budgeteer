@@ -36,6 +36,7 @@ public class AverageDailyRateChartConfiguration extends ChartConfiguration {
         
         String dateFormat = "dd.MMM";
         
+        // TODO: Date Labels are wrong. now minus days reverse
         
         setType(ChartType.LINE);
         
