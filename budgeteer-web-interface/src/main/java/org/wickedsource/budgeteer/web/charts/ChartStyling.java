@@ -15,7 +15,6 @@ public class ChartStyling {
                 new RgbColor(0, 31, 63),
                 new RgbColor(57, 204, 204),
                 new RgbColor(61, 153, 112),
-                new RgbColor(61, 153, 112),
                 new RgbColor(245, 105, 84)
                 );
 	}

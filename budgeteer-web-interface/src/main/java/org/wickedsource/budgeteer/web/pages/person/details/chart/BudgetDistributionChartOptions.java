@@ -15,7 +15,12 @@ import java.util.Arrays;
 
 public class BudgetDistributionChartOptions extends Options {
 
-    public BudgetDistributionChartOptions(BudgetDistributionChartModel model) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public BudgetDistributionChartOptions(BudgetDistributionChartModel model) {
 
         setChart(new ChartOptions()
                 .setHeight(200)
