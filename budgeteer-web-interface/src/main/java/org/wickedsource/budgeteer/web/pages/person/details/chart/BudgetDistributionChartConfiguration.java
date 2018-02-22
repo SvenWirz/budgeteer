@@ -22,11 +22,6 @@ import java.util.stream.Collectors;
 
 public class BudgetDistributionChartConfiguration extends ChartConfiguration {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
 	public BudgetDistributionChartConfiguration(BudgetDistributionChartModel model) {
     	// Get ModelData
     	List<DoubleValue> data = model.getObject().stream().map(

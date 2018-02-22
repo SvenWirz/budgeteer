@@ -1,6 +1,7 @@
 package org.wickedsource.budgeteer.web.pages.contract.details.contractDetailChart;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.wickedsource.budgeteer.MoneyUtil;
@@ -9,14 +10,9 @@ import org.wickedsource.budgeteer.web.charts.ChartStyling;
 import org.wickedsource.budgeteer.web.charts.ChartUtils;
 
 import de.adesso.wickedcharts.chartjs.ChartConfiguration;
-import de.adesso.wickedcharts.chartjs.chartoptions.AxesScale;
 import de.adesso.wickedcharts.chartjs.chartoptions.ChartType;
 import de.adesso.wickedcharts.chartjs.chartoptions.Data;
 import de.adesso.wickedcharts.chartjs.chartoptions.Dataset;
-import de.adesso.wickedcharts.chartjs.chartoptions.GridLines;
-import de.adesso.wickedcharts.chartjs.chartoptions.Legend;
-import de.adesso.wickedcharts.chartjs.chartoptions.Options;
-import de.adesso.wickedcharts.chartjs.chartoptions.Scales;
 import de.adesso.wickedcharts.chartjs.chartoptions.TooltipMode;
 import de.adesso.wickedcharts.chartjs.chartoptions.Tooltips;
 import de.adesso.wickedcharts.chartjs.chartoptions.label.TextLabel;
@@ -29,8 +25,16 @@ public class ContractDetailChartConfiguration extends ChartConfiguration {
     public ContractDetailChartConfiguration(ContractDetailChartModel model) {
     	setType(ChartType.BAR);
     	
-    	setOptions(new Options()
-    			.setScales(new Scales()));
+    	setOptions(ChartStyling.getOptions());
+    	
+    	setOptionalJavascript(new ArrayList<String>());
+		addOptionalJavascript(ChartStyling.readFile("dataLabellingPlugin.js"));
+    	
+    	getOptions().setTooltips(new Tooltips()
+				.setIntersect(true)
+				.setMode(TooltipMode.INDEX));
+    	
+    	getOptions().getLayout().getPadding().setTop(25);
 
     	Dataset remainingTotalBudget = new Dataset()
     			.setLabel(PropertyLoader.getProperty(ContractDetailChart.class, "chart.seriesName.remainingBudget"))
@@ -51,21 +55,5 @@ public class ContractDetailChartConfiguration extends ChartConfiguration {
     			.setLabels(TextLabel.of(ChartUtils.getMonthLabels(model.getNumberOfMonths())))
     			.setDatasets(Arrays.asList(remainingTotalBudget,burnedMoneyAllBudget,burnedMoneyInvoice)));
     	
-		setOptions(new Options()
-//				.setMaintainAspectRatio(false)
-				.setResponsive(true)
-				.setTooltips(new Tooltips()
-						.setIntersect(true)
-						.setMode(TooltipMode.INDEX))
-				.setLegend(new Legend()
-						.setDisplay(false))
-				.setScales(new Scales()
-						.setXAxes(new AxesScale()
-								.setGridLines(new GridLines()
-										.setDisplay(false)
-										.setDrawBorder(false)))
-						.setYAxes(new AxesScale()
-								.setGridLines(new GridLines()
-										.setDrawBorder(false)))));
     }
 }
