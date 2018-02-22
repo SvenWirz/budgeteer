@@ -47,9 +47,9 @@ dependencies {
     compile(
             [group: 'org.apache.wicket', name: 'wicket-spring', version: "${wicket_spring_version}"],
             [group: 'org.wicketstuff', name: 'wicketstuff-lazymodel', version: "${wicketstuff_lazymodel_version}"],
-            [group: 'com.googlecode.wicked-charts', name: 'wicked-charts-wicket7', version: "${wicketcharts_version}"],
-            [group: 'de.adesso.wicked-charts', name: 'wicked-charts-wicket7', version: "2.0.1"],
-            [group: 'de.adesso.wicked-charts', name: 'chartjs-wrapper', version: "2.0.1"]
+            //[group: 'com.googlecode.wicked-charts', name: 'wicked-charts-wicket7', version: "${wicketcharts_version}"],
+            [group: 'de.adesso.wicked-charts', name: 'wicked-charts-wicket7', version: "${wicketcharts_version_ad}"],
+            [group: 'de.adesso.wicked-charts', name: 'chartjs-wrapper', version: "${wicketcharts_version_ad}"]
     )
 
     compile group: 'org.springframework', name: 'spring-webmvc', version: "${spring_version}"
