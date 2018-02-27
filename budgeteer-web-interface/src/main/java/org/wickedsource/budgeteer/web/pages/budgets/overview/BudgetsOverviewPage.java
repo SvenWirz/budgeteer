@@ -13,6 +13,7 @@ import org.wickedsource.budgeteer.web.pages.budgets.BudgetTagsModel;
 import org.wickedsource.budgeteer.web.pages.budgets.edit.EditBudgetPage;
 import org.wickedsource.budgeteer.web.pages.budgets.monthreport.multi.MultiBudgetMonthReportPage;
 import org.wickedsource.budgeteer.web.pages.budgets.overview.filter.BudgetTagFilterPanel;
+import org.wickedsource.budgeteer.web.pages.budgets.overview.report.BudgetReportModel;
 import org.wickedsource.budgeteer.web.pages.budgets.overview.table.BudgetOverviewTable;
 import org.wickedsource.budgeteer.web.pages.budgets.overview.table.FilteredBudgetModel;
 import org.wickedsource.budgeteer.web.pages.budgets.weekreport.multi.MultiBudgetWeekReportPage;
@@ -26,7 +27,12 @@ import static org.wicketstuff.lazymodel.LazyModel.model;
 @Mount("budgets")
 public class BudgetsOverviewPage extends BasePage {
 
-    public BudgetsOverviewPage() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public BudgetsOverviewPage() {
         BudgetTagsModel tagsModel = new BudgetTagsModel(BudgeteerSession.get().getProjectId());
         if (BudgeteerSession.get().getBudgetFilter() == null) {
             BudgetTagFilter filter = new BudgetTagFilter(new ArrayList<String>(), BudgeteerSession.get().getProjectId());
@@ -38,9 +44,16 @@ public class BudgetsOverviewPage extends BasePage {
         add(new BookmarkablePageLink<MultiBudgetWeekReportPage>("weekReportLink", MultiBudgetWeekReportPage.class));
         add(new BookmarkablePageLink<MultiBudgetMonthReportPage>("monthReportLink", MultiBudgetMonthReportPage.class));
         add(createNewBudgetLink("createBudgetLink"));
-        add(new DownloadLink("createReportLink", new BudgetReportModel(BudgeteerSession.get().getProjectId(), model(from(BudgeteerSession.get().getBudgetFilter())))));
+        add(createDownloadLink("createReportLink"));
 
     }
+
+	private DownloadLink createDownloadLink(String id) {
+		String filename = "report.xlsx";
+		return new DownloadLink(id, new BudgetReportModel(BudgeteerSession.get().getProjectId(),
+				model(from(BudgeteerSession.get().getBudgetFilter()))),
+				filename);
+	}
 
     private Link createNewBudgetLink(String id) {
         return new Link(id) {
