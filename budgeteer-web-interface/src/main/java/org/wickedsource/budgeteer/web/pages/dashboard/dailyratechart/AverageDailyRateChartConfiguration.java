@@ -17,6 +17,7 @@ import org.wickedsource.budgeteer.web.charts.ChartStyling;
 
 import com.google.common.collect.Lists;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -25,7 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class AverageDailyRateChartConfiguration extends ChartConfiguration {
+public class AverageDailyRateChartConfiguration extends ChartConfiguration implements Serializable {
 
     public AverageDailyRateChartConfiguration(AverageDailyRateChartModel model) {
         Injector.get().inject(this);
