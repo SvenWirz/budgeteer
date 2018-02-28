@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.wickedsource.budgeteer.MoneyUtil;
@@ -19,14 +17,8 @@ import org.wickedsource.budgeteer.SheetTemplate.SheetTemplate;
 import org.wickedsource.budgeteer.SheetTemplate.SheetTemplateWriter;
 import org.wickedsource.budgeteer.persistence.budget.BudgetEntity;
 import org.wickedsource.budgeteer.persistence.budget.BudgetRepository;
-import org.wickedsource.budgeteer.persistence.contract.ContractEntity;
-import org.wickedsource.budgeteer.persistence.contract.ContractRepository;
-import org.wickedsource.budgeteer.persistence.person.DailyRateRepository;
-import org.wickedsource.budgeteer.persistence.project.ProjectRepository;
-import org.wickedsource.budgeteer.persistence.record.PlanRecordRepository;
 import org.wickedsource.budgeteer.persistence.record.WorkRecordRepository;
 import org.wickedsource.budgeteer.service.contract.ContractBaseData;
-import org.wickedsource.budgeteer.service.contract.ContractDataMapper;
 import org.wickedsource.budgeteer.service.contract.ContractService;
 import org.wickedsource.budgeteer.service.person.PersonService;
 import org.wickedsource.budgeteer.service.record.RecordService;
@@ -74,10 +66,24 @@ public class ReportService {
 		
 		List<BudgetSummary> summary = recipients.stream().map(description -> new BudgetSummary(description))
 				.collect(Collectors.toList());
-	
-		writeDTOIntoWorkbook(wb,budgetList);
-		writeDTOIntoWorkbook(wb,summary);
+
+		SheetTemplate template = new SheetTemplate(BudgetReportData.class, wb.getSheetAt(0));
+		SheetTemplateWriter<BudgetReportData> tw = new SheetTemplateWriter<BudgetReportData>(template);
+		tw.setEntries(budgetList);
+		budgetList.stream().forEach(budgetData -> {
+			if(budgetData.getProgress() >= 0.6 && budgetData.getProgress() < 0.8) {
+				tw.addFlag(budgetData, "progress", "warning1");
+			} else if(budgetData.getProgress() >= 0.8 && budgetData.getProgress() < 1 ) {
+				tw.addFlag(budgetData, "progress", "warning2");
+			} else if(budgetData.getProgress() >= 1 ) {
+				tw.addFlag(budgetData, "progress", "warninig3");
+			}
+		});
+		tw.write();
+		
+		writeDTOIntoWorkbook(wb.getSheetAt(0),summary,BudgetSummary.class);
 		XSSFFormulaEvaluator.evaluateAllFormulaCells(wb);
+		tw.removeFlagSheet();
 		return createOutputFile(wb);
 	}
 	
@@ -95,12 +101,11 @@ public class ReportService {
 		return outputFile;
 	}
 
-	private <T> void writeDTOIntoWorkbook(XSSFWorkbook wb, List<T> list) {
-		Sheet sheet = wb.getSheetAt(0);
-		SheetTemplate template = new SheetTemplate(list.get(0).getClass(), sheet);
-		
+	private <T> void writeDTOIntoWorkbook(Sheet sheet, List<T> list, Class<?> dtoClass) {
+		SheetTemplate template = new SheetTemplate(dtoClass, sheet);
 		SheetTemplateWriter<T> tw = new SheetTemplateWriter<T>(template);
-		tw.writeDataIntoSheet(list, wb.getSheetAt(0));
+		tw.setEntries(list);
+		tw.write();
 	}
 	
 	public List<BudgetReportData> loadBudgetReportData(long projectId, BudgetTagFilter filter) {
@@ -133,7 +138,9 @@ public class ReportService {
 		data.setUntil(new Date()); // TODO: ausgewählter Monat
 		data.setRecipient(recipient);
 		data.setSpent_net(MoneyUtil.toDouble(toMoneyNullsafe(spentBudgetInCents)));
+		data.setSpent_gross(data.getSpent_net()*1.19); // TODO: Steuersatz
 		data.setBudgetRemaining_net(MoneyUtil.toDouble(entity.getTotal().minus(toMoneyNullsafe(spentBudgetInCents))));
+		data.setBudgetRemaining_gross(data.getBudgetRemaining_net()*1.19);
 		data.setHoursAggregated(hours);
 		data.setProgress(MoneyUtil.toDouble(toMoneyNullsafe(spentBudgetInCents))/MoneyUtil.toDouble(entity.getTotal()));
 		return data;

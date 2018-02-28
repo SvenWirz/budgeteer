@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.RichTextString;
@@ -22,17 +23,30 @@ public class SheetTemplateWriter<T>  {
 	private static final Pattern pattern = Pattern.compile("\\{(\\w*)\\}");
 	
 	private SheetTemplate template;
+	private Sheet sheet;
+	private List<T> entries;
+	private MultiKeyMap<Object,String> flagMapping;
 
 	public SheetTemplateWriter(SheetTemplate sheetTemplate) {
 		this.template = sheetTemplate;
+		this.sheet = sheetTemplate.getSheet();
+		flagMapping = new MultiKeyMap<Object,String>();
 	}
 	
-	public void writeDataIntoSheet(List<T> entries, Sheet sheet) {
+	public SheetTemplateWriter(SheetTemplate sheetTemplate, List<T> entries) {
+		this.template = sheetTemplate;
+		this.sheet = sheetTemplate.getSheet();
+		this.entries = entries;
+		flagMapping = new MultiKeyMap<Object,String>();
+	}
+	
+	public void setEntries(List<T> entries) {
+		this.entries = entries;
+	}
+	
+	public void write() {
 		if(null == entries || entries.isEmpty()) {
 			sheet.removeRow(sheet.getRow(template.getTemplateRowIndex()));
-//			if(template.getTemplateRowIndex() < sheet.getLastRowNum()) {
-//				sheet.shiftRows(template.getTemplateRowIndex(), sheet.getLastRowNum(), -1);
-//			}
 			return;
 		} else if (!template.getDtoClass().isInstance(entries.get(0))) {
 			throw new IllegalArgumentException("List is empty or wrong data type in list");
@@ -72,11 +86,19 @@ public class SheetTemplateWriter<T>  {
 		Cell cell = currentRow.getCell(columnIndex);
 		try {
 			mapCellValue(dto,field,cell);
+			setFlag(dto,field,cell);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	}
 	
+
+	private void setFlag(T dto, Field field, Cell cell) {
+		if(flagMapping.containsKey(dto,field.getName())) {
+			cell.setCellStyle(sheet.getWorkbook().createCellStyle());
+			cell.getCellStyle().cloneStyleFrom(template.getFlagTemplate().getCellStyleFor(flagMapping.get(dto, field.getName())));
+		}
+	}
 
 	void mapCellValue(T dto, Field field, Cell cell) throws IllegalAccessException {
 		boolean isComplexCell = isComplexCell(cell);
@@ -111,7 +133,7 @@ public class SheetTemplateWriter<T>  {
 	}
 	
 	void copyRow(Sheet sheet, int from) {
-		if(from != sheet.getLastRowNum()) {
+		if(from < sheet.getLastRowNum()) {
 			sheet.shiftRows(from+1, sheet.getLastRowNum(), 1);
 		}
 		Row copyRow = sheet.getRow(from);
@@ -120,6 +142,8 @@ public class SheetTemplateWriter<T>  {
 			Cell insertCell = insertRow.createCell(copyCell.getColumnIndex());
 			copyCellValues(copyCell,insertCell);
 			insertCell.setCellStyle(copyCell.getCellStyle());
+			//insertCell.setCellStyle(sheet.getWorkbook().createCellStyle());
+			//insertCell.getCellStyle().cloneStyleFrom(copyCell.getCellStyle());
 		});
 	}
 
@@ -180,6 +204,22 @@ public class SheetTemplateWriter<T>  {
 			cell.setCellValue(Calendar.class.cast(fieldValue));
 		} else {
 			throw new IllegalArgumentException();
+		}
+	}
+	
+	public void addFlag(T dto, String fieldname, String flag) {
+		if(template.getFieldList().contains(fieldname) && null != template.getFlagTemplate() && template.getFlagTemplate().contains(flag)) {
+			flagMapping.put(dto, fieldname, flag);
+		} else {
+			// TODO: Exception
+		}
+	}
+	
+	public void removeFlagSheet() {
+		Sheet flagSheet = sheet.getWorkbook().getSheet("Flags");
+		if(null != flagSheet) {
+			int sheetIndex = sheet.getWorkbook().getSheetIndex(flagSheet);
+			sheet.getWorkbook().removeSheetAt(sheetIndex);
 		}
 	}
 

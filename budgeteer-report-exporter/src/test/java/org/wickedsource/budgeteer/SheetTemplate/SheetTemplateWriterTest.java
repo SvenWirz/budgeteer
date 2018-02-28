@@ -2,20 +2,22 @@ package org.wickedsource.budgeteer.SheetTemplate;
 
 import static org.junit.Assert.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,21 +27,25 @@ public class SheetTemplateWriterTest {
 	
 	private Workbook wb;
 	private Sheet sheet;
-	private CellStyle testStyle;
 	private SheetTemplate template;
+	private TestDTO dto1,dto2;
 	
 	public class TestDTO {
 		private String test;
 		private double foo;
 		private boolean bar;
 		private Date date;
-		private Calendar calendar;
-		
-		public Calendar getCalendar() {
-			return calendar;
+		public String getTest() {
+			return test;
 		}
-		public void setCalendar(Calendar calendar) {
-			this.calendar = calendar;
+		public void setTest(String test) {
+			this.test = test;
+		}
+		public double getFoo() {
+			return foo;
+		}
+		public void setFoo(double foo) {
+			this.foo = foo;
 		}
 		public boolean isBar() {
 			return bar;
@@ -53,47 +59,27 @@ public class SheetTemplateWriterTest {
 		public void setDate(Date date) {
 			this.date = date;
 		}
-		public String getTest() {
-			return test;
-		}
-		public void setTest(String test) {
-			this.test = test;
-		}
-		public double getFoo() {
-			return foo;
-		}
-		public void setFoo(double foo) {
-			this.foo = foo;
-		}
 
 		
 	}
 	
 	@Before
-	public void setUp() {
-		wb = new XSSFWorkbook();
-		sheet = wb.createSheet();
-		Row templateRow = sheet.createRow(4);
-		templateRow.createCell(2).setCellValue("test");
-		
-		templateRow.createCell(5).setCellValue("{test}");
-		testStyle = templateRow.getCell(5).getCellStyle();
-		testStyle.setFillBackgroundColor(IndexedColors.BLACK.getIndex());
-		
-		templateRow.createCell(3).setCellValue("{foo} - {bar}");
-		templateRow.createCell(10).setCellValue(1235.123456);
-		templateRow.createCell(11).setCellFormula("TODAY()");
-		templateRow.createCell(12).setCellValue(false);
-		templateRow.createCell(13).setCellValue(new GregorianCalendar());
-		templateRow.createCell(14).setCellValue(new Date());
-		templateRow.createCell(15).setCellValue(new Date());
-		templateRow.createCell(8).setCellType(CellType.FORMULA);
-		templateRow.getCell(8).setCellFormula("CONCATENATE(\"{foo}\",\"{bar}\")");
-		
-		
-		templateRow.createCell(100).setCellValue("hallo: {foo}");
-		
+	public void setUp() throws EncryptedDocumentException, InvalidFormatException, IOException {
+		InputStream in = new FileInputStream("test-mapping.xlsx");
+		wb = (XSSFWorkbook) WorkbookFactory.create(in);
+		sheet = wb.getSheetAt(0);
 		template = new SheetTemplate(TestDTO.class, sheet);
+		dto1 = new TestDTO();
+		dto1.setBar(true);
+		dto1.setFoo(123.4567899);
+		dto1.setTest("Foo");
+		dto1.setDate(new Date());
+		
+		dto2 = new TestDTO();
+		dto2.setBar(false);
+		dto2.setFoo(987.654321);
+		dto2.setTest("Bar");
+		dto2.setDate(new Date());
 	}
 	
 	@SuppressWarnings("unused")
@@ -105,12 +91,8 @@ public class SheetTemplateWriterTest {
 	@Test
 	public void testIsComplexCell() {
 		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
-		assertTrue(stw.isComplexCell(sheet.getRow(4).getCell(3)));
-		assertTrue(stw.isComplexCell(sheet.getRow(4).getCell(100)));
-		assertFalse(stw.isComplexCell(sheet.getRow(4).getCell(5)));
-		assertTrue(stw.isComplexCell(sheet.getRow(4).getCell(2)));
+		assertFalse(stw.isComplexCell(sheet.getRow(4).getCell(0)));
 		assertTrue(stw.isComplexCell(sheet.getRow(4).getCell(1)));
-		assertTrue(stw.isComplexCell(sheet.getRow(4).getCell(8)));
 	}
 	
 	@Test
@@ -179,88 +161,76 @@ public class SheetTemplateWriterTest {
 	@Test
 	public void testFieldValueToCellValue() throws IllegalAccessException, NoSuchFieldException, SecurityException {
 		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
-		TestDTO dto = new TestDTO();
-		dto.setBar(true);
+
 		Date now = new Date();
-		dto.setDate(now);
-		dto.setFoo(123.4567899);
-		dto.setTest("Foo");
-		Calendar cal = new GregorianCalendar();
-		dto.setCalendar(cal);
+		dto1.setDate(now);
 		
-		Field[] fields = dto.getClass().getDeclaredFields();
+		Field[] fields = dto1.getClass().getDeclaredFields();
 		Arrays.stream(fields).forEach(field -> field.setAccessible(true));
 
-		stw.mapFieldValueToCellValue(dto, fields[3], sheet.getRow(4).getCell(14));
-		assertEquals(CellType.NUMERIC,sheet.getRow(4).getCell(14).getCellTypeEnum());
-		assertEquals(now,sheet.getRow(4).getCell(14).getDateCellValue());
+		Cell cell = null;
 		
-		stw.mapFieldValueToCellValue(dto, fields[1], sheet.getRow(4).getCell(10));
-		assertEquals(CellType.NUMERIC, sheet.getRow(4).getCell(10).getCellTypeEnum());
-		assertEquals(123.4567899,sheet.getRow(4).getCell(10).getNumericCellValue(),10e-8);
+		cell = sheet.getRow(4).getCell(4);
+		stw.mapFieldValueToCellValue(dto1, fields[3], cell);
+		assertEquals(CellType.NUMERIC,cell.getCellTypeEnum());
+		assertEquals(now,cell.getDateCellValue());
 		
-		stw.mapFieldValueToCellValue(dto, fields[2], sheet.getRow(4).getCell(12));
-		assertEquals(CellType.BOOLEAN, sheet.getRow(4).getCell(12).getCellTypeEnum());
-		assertEquals(true,sheet.getRow(4).getCell(12).getBooleanCellValue());
+		cell = sheet.getRow(4).getCell(18);
+		stw.mapFieldValueToCellValue(dto1, fields[1], cell);
+		assertEquals(CellType.NUMERIC, cell.getCellTypeEnum());
+		assertEquals(123.4567899,cell.getNumericCellValue(),10e-8);
 		
-		stw.mapFieldValueToCellValue(dto, fields[0], sheet.getRow(4).getCell(15));
-		assertEquals(CellType.STRING, sheet.getRow(4).getCell(15).getCellTypeEnum());
-		assertEquals("Foo",sheet.getRow(4).getCell(15).getStringCellValue());
+		cell = sheet.getRow(4).getCell(2);
+		stw.mapFieldValueToCellValue(dto1, fields[2],cell);
+		assertEquals(CellType.BOOLEAN, cell.getCellTypeEnum());
+		assertEquals(true,cell.getBooleanCellValue());
+		
+		cell = sheet.getRow(4).getCell(0);
+		stw.mapFieldValueToCellValue(dto1, fields[0], cell);
+		assertEquals(CellType.STRING, cell.getCellTypeEnum());
+		assertEquals("Foo",cell.getStringCellValue());
 	}
 	
 	@Test
 	public void testReplaceTemplateTags() {
 		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
-		TestDTO dto = new TestDTO();
-		dto.setBar(true);
-		Date now = new Date();
-		dto.setDate(now);
-		dto.setFoo(123.4567899);
-		dto.setTest("Foo");
-		Calendar cal = new GregorianCalendar();
-		dto.setCalendar(cal);
-		
 		Row row = sheet.getRow(4);
-		
-		stw.replaceTemplateTags(template.getFieldMapping(), dto, row);
-
-		assertEquals("Foo",row.getCell(5).getStringCellValue());
-		assertEquals("123.4567899 - true",row.getCell(3).getStringCellValue());
-		assertEquals("hallo: 123.4567899",row.getCell(100).getStringCellValue());
+		stw.replaceTemplateTags(template.getFieldMapping(), dto1, row);
+		assertEquals("Foo - 123.4567899",row.getCell(1).getStringCellValue());
 	}
 	
 	@Test
 	public void testWriteDataIntoSheet() {
 		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
-		TestDTO dto1 = new TestDTO();
-		dto1.setBar(true);
-		dto1.setFoo(123.4567899);
-		dto1.setTest("Foo");
-		
-		TestDTO dto2 = new TestDTO();
-		dto2.setBar(false);
-		dto2.setFoo(987.654321);
-		dto2.setTest("Bar");
-		
-		stw.writeDataIntoSheet(Arrays.asList(dto1,dto2), sheet);
+		stw.setEntries(Arrays.asList(dto1,dto2));
+		stw.write();
 		
 		Row row = sheet.getRow(4);
-
-		assertEquals("Foo",row.getCell(5).getStringCellValue());
-		assertEquals("123.4567899 - true",row.getCell(3).getStringCellValue());
-		assertEquals("hallo: 123.4567899",row.getCell(100).getStringCellValue());
+		assertEquals("Foo - 123.4567899",row.getCell(1).getStringCellValue());
 		
 		row = sheet.getRow(5);
-		assertEquals("Bar",row.getCell(5).getStringCellValue());
-		assertEquals("987.654321 - false",row.getCell(3).getStringCellValue());
-		assertEquals("hallo: 987.654321",row.getCell(100).getStringCellValue());
+		assertEquals("Bar - 987.654321",row.getCell(1).getStringCellValue());
 	}
 	
 	@Test
 	public void testWriteDataIntoSheetAndListIsEmpty() {
 		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
-		stw.writeDataIntoSheet(new ArrayList<TestDTO>(), sheet);
+		stw.setEntries(new ArrayList<TestDTO>());
+		stw.write();
 		assertTrue(rowIsEmpty(sheet.getRow(4)));
+	}
+	
+	@Test
+	public void testFlagTemplate() throws EncryptedDocumentException, InvalidFormatException, IOException {
+		SheetTemplateWriter<TestDTO> stw = new SheetTemplateWriter<SheetTemplateWriterTest.TestDTO>(template);
+		stw.setEntries(Arrays.asList(dto1,dto2));
+		stw.addFlag(dto2, "test", "warning1");
+		
+		stw.write();
+		
+		CellStyle expected = wb.getSheet("Flags").getRow(0).getCell(0).getCellStyle();
+		CellStyle was = sheet.getRow(4).getCell(0).getCellStyle();
+		assertEquals(expected,was);
 	}
 	
 	private boolean rowIsEmpty(Row row) {

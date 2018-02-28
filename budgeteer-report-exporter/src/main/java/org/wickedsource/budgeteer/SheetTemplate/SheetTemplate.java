@@ -25,6 +25,7 @@ public class SheetTemplate {
 	private int templateRowIndex;
 	private List<String> fieldList;
 	private Class<?> dtoClass;
+	private FlagTemplate flagTemplate;
 	
 	public SheetTemplate(Class<?> dtoClass, Sheet sheet) {
 		this.sheet = sheet;
@@ -43,6 +44,16 @@ public class SheetTemplate {
 	private void processSheet() {
 		findTemplateRow();
 		mapFieldsToCells();
+		checkForFlagTemplate();
+	}
+
+	private void checkForFlagTemplate() {
+		Sheet flagSheet =sheet.getWorkbook().getSheet("Flags");
+		if(flagSheet != null) {
+			flagTemplate = new FlagTemplate(flagSheet);
+		} else {
+			flagTemplate = null;
+		}
 	}
 
 	private void mapFieldsToCells() {
@@ -118,5 +129,16 @@ public class SheetTemplate {
 	public Class<?> getDtoClass() {
 		return dtoClass;
 	}
+
+	public Sheet getSheet() {
+		return sheet;
+	}
+
+	public List<String> getFieldList() {
+		return fieldList;
+	}
 	
+	FlagTemplate getFlagTemplate() {
+		return flagTemplate;
+	}
 }
