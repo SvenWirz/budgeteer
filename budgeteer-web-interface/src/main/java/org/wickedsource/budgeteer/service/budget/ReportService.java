@@ -53,7 +53,7 @@ public class ReportService {
 
 	public File createReportFile(List<BudgetReportData> budgetList) {
 		ClassLoader classLoader = getClass().getClassLoader();
-		InputStream in = classLoader.getResourceAsStream("report-mapping.xlsx");
+		InputStream in = classLoader.getResourceAsStream("report-template.xlsx");
 		XSSFWorkbook wb = null;
 		try {
 			wb = (XSSFWorkbook) WorkbookFactory.create(in);
