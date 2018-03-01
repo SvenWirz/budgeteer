@@ -70,22 +70,58 @@ public class SheetTemplateWriter<T>  {
 	}
 
 	void replaceTemplateTags(Multimap<String, Integer> mapping, T dto, Row currentRow) {
-		Collection<Integer> columnIndices;
-		for (Field field : template.getDtoClass().getDeclaredFields()) {
+		// dumm, es genügt über template field zu iterieren. Da sind alle wirklich benötigten enthalten
+		for (Field field : template.getDtoClass().getDeclaredFields()) { 
 			field.setAccessible(true);
-			if (mapping.containsKey(field.getName())) {
-				columnIndices = mapping.get(field.getName());
-				columnIndices.stream().forEach(columnIndex -> {
-					replaceTemplateTagInCell(dto, currentRow, field, columnIndex);
-				});
+			if (isDynamic(field)) {
+				handleDynamicField(mapping, dto, currentRow, field);
+			} else {
+				handleSimpleField(mapping, dto, currentRow, field);
 			}
 		}
+	}
+
+	void handleDynamicField(Multimap<String, Integer> mapping, T dto, Row currentRow, Field field) {
+		String fieldName = null;
+		Collection<Integer> columnIndices;
+		try {
+			List<SheetTemplateSerializable> list = (List) field.get(dto);
+			for (SheetTemplateSerializable attribute : list) {
+				fieldName = field.getName() + "." + attribute.getName();
+				if (mapping.containsKey(fieldName)) {
+					columnIndices = mapping.get(field.getName());
+					columnIndices.stream()
+							.forEach(columnIndex -> replaceTemplateTagInCell(dto, currentRow, field, columnIndex));
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void handleSimpleField(Multimap<String, Integer> mapping, T dto, Row currentRow, Field field) {
+		Collection<Integer> columnIndices;
+		if (mapping.containsKey(field.getName())) {
+			columnIndices = mapping.get(field.getName());
+			columnIndices.stream().forEach(columnIndex -> {
+				replaceTemplateTagInCell(dto, currentRow, field, columnIndex);
+			});
+		}
+	}
+
+	boolean isDynamic(Field field) {
+		if(field.getType().equals(List.class)) {
+			return true;
+		}
+		return false;
 	}
 
 	void replaceTemplateTagInCell(T dto, Row currentRow, Field field, Integer columnIndex) {
 		Cell cell = currentRow.getCell(columnIndex);
 		try {
-			mapCellValue(dto,field,cell);
+			mapCellValue(field.get(dto),field.getName(),cell);
 			setFlag(dto,field,cell);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
@@ -100,32 +136,31 @@ public class SheetTemplateWriter<T>  {
 		}
 	}
 
-	void mapCellValue(T dto, Field field, Cell cell) throws IllegalAccessException {
+	void mapCellValue(Object fieldValue, String fieldname, Cell cell) throws IllegalAccessException {
 		boolean isComplexCell = isComplexCell(cell);
-		String replaceString = String.format(FORMAT, field.getName());
-		Object fieldValue = field.get(dto);
+		String replaceString = String.format(FORMAT, fieldname);
 		
 		switch(cell.getCellTypeEnum()) {
 			case NUMERIC:
-				mapFieldValueToCellValue(dto,field,cell);
+				mapFieldValueToCellValue(fieldValue,cell);
 				break;
 			case STRING:
 				if(isComplexCell) {
 					String cellvalue  = cell.getStringCellValue().replaceAll(replaceString, fieldValue.toString());
 					cell.setCellValue(cellvalue);
 				} else {
-					mapFieldValueToCellValue(dto,field,cell);
+					mapFieldValueToCellValue(fieldValue,cell);
 				}
 				break;
 			case BOOLEAN:
-				mapFieldValueToCellValue(dto,field,cell);
+				mapFieldValueToCellValue(fieldValue,cell);
 				break;
 			case FORMULA:
 				if(isComplexCell) {
 					String cellvalue  = cell.getCellFormula().replaceAll(replaceString, fieldValue.toString());
 					cell.setCellFormula(cellvalue);
 				} else {
-					mapFieldValueToCellValue(dto,field,cell);
+					mapFieldValueToCellValue(fieldValue,cell);
 				}
 			default:
 				break;
@@ -142,8 +177,6 @@ public class SheetTemplateWriter<T>  {
 			Cell insertCell = insertRow.createCell(copyCell.getColumnIndex());
 			copyCellValues(copyCell,insertCell);
 			insertCell.setCellStyle(copyCell.getCellStyle());
-			//insertCell.setCellStyle(sheet.getWorkbook().createCellStyle());
-			//insertCell.getCellStyle().cloneStyleFrom(copyCell.getCellStyle());
 		});
 	}
 
@@ -184,8 +217,7 @@ public class SheetTemplateWriter<T>  {
 		return !matcher.matches();
 	}
 	
-	void mapFieldValueToCellValue(T dto, Field field, Cell cell) throws IllegalAccessException {
-		Object fieldValue = field.get(dto);
+	void mapFieldValueToCellValue(Object fieldValue, Cell cell) throws IllegalAccessException {
 		if(null == fieldValue) {
 			cell.setCellType(CellType.BLANK);
 			return;

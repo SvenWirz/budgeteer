@@ -67,6 +67,7 @@ public class SheetTemplateTest {
 		templateRow.createCell(3).setCellValue("{foo} - {bar}");
 		templateRow.createCell(15).setCellValue("{dynamic.name}");
 		templateRow.createCell(16).setCellValue("{.name}");
+		templateRow.createCell(17).setCellValue("{notexisting.name}");
 		templateRow.createCell(4).setCellValue(1235.123456);
 		
 		
@@ -105,6 +106,7 @@ public class SheetTemplateTest {
 		SheetTemplate st = new SheetTemplate(TestDTO.class, sheet);
 		assertTrue(st.cellContainsTemplateTag(sheet.getRow(4).getCell(15)));
 		assertFalse(st.cellContainsTemplateTag(sheet.getRow(4).getCell(16)));
+		assertFalse(st.cellContainsTemplateTag(sheet.getRow(4).getCell(17)));
 	}
 	
 	@Test
