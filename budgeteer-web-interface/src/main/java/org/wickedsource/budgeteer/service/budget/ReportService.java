@@ -101,7 +101,7 @@ public class ReportService {
 		return outputFile;
 	}
 
-	private <T> void writeDTOIntoWorkbook(Sheet sheet, List<T> list, Class<?> dtoClass) {
+	<T> void writeDTOIntoWorkbook(Sheet sheet, List<T> list, Class<?> dtoClass) {
 		SheetTemplate template = new SheetTemplate(dtoClass, sheet);
 		SheetTemplateWriter<T> tw = new SheetTemplateWriter<T>(template);
 		tw.setEntries(list);
@@ -120,14 +120,14 @@ public class ReportService {
 		return data;
 	}
 	
-	private BudgetReportData mapBudgetToBudgetReportData(BudgetEntity entity) {
+	BudgetReportData mapBudgetToBudgetReportData(BudgetEntity entity) {
         Double spentBudgetInCents = workRecordRepository.getSpentBudget(entity.getId());
         WorkRecordFilter filter = new WorkRecordFilter(BudgeteerSession.get().getProjectId());
         filter.getBudgetList().add(new BudgetBaseData(entity.getId(), ""));
         filter.getPossiblePersons().addAll(personService.loadPeopleBaseDataByBudget(entity.getId()));
         List<WorkRecord> records = recordService.getFilteredRecords(filter);
         ContractBaseData contract = contractService.getContractById(entity.getContract().getId());
-        
+        	
         Double hours = records.stream().mapToDouble(record -> record.getHours()).sum();
         String recipient = contract.getContractAttributes() != null ? contract.getContractAttributes().get(0).getValue() : "";
         
@@ -138,7 +138,7 @@ public class ReportService {
 		data.setUntil(new Date()); // TODO: ausgewählter Monat
 		data.setRecipient(recipient);
 		data.setSpent_net(MoneyUtil.toDouble(toMoneyNullsafe(spentBudgetInCents)));
-		data.setSpent_gross(data.getSpent_net()*1.19); // TODO: Steuersatz
+		data.setSpent_gross(data.getSpent_net()*1.19); // TODO: Steuersatz verallgemeinern
 		data.setBudgetRemaining_net(MoneyUtil.toDouble(entity.getTotal().minus(toMoneyNullsafe(spentBudgetInCents))));
 		data.setBudgetRemaining_gross(data.getBudgetRemaining_net()*1.19);
 		data.setHoursAggregated(hours);

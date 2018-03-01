@@ -1,6 +1,8 @@
 package org.wickedsource.budgeteer.SheetTemplate;
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
@@ -23,6 +25,7 @@ public class SheetTemplateTest {
 		private String test;
 		private double foo;
 		private double bar;
+		private List<Attribute> dynamic;
 		public String getTest() {
 			return test;
 		}
@@ -41,7 +44,12 @@ public class SheetTemplateTest {
 		public void setBar(double bar) {
 			this.bar = bar;
 		}
-
+		public List<Attribute> getDynamic() {
+			return dynamic;
+		}
+		public void setDynamic(List<Attribute> dynamic) {
+			this.dynamic = dynamic;
+		}
 		
 	}
 	
@@ -55,8 +63,10 @@ public class SheetTemplateTest {
 		templateRow.createCell(5).setCellValue("{test}");
 		testStyle = templateRow.getCell(5).getCellStyle();
 		testStyle.setFillBackgroundColor(IndexedColors.BLACK.getIndex());
-		
+
 		templateRow.createCell(3).setCellValue("{foo} - {bar}");
+		templateRow.createCell(15).setCellValue("{dynamic.name}");
+		templateRow.createCell(16).setCellValue("{.name}");
 		templateRow.createCell(4).setCellValue(1235.123456);
 		
 		
@@ -81,12 +91,20 @@ public class SheetTemplateTest {
 		assertTrue(mapping.containsKey("foo"));
 		assertTrue(mapping.get("foo").contains(100));
 		assertTrue(mapping.get("foo").contains(3));
+		assertTrue(mapping.get("dynamic.name").contains(15));
 	}
 	
 	@Test
 	public void testCellContainsTemplateTagAndNotContainsTag() {
 		SheetTemplate st = new SheetTemplate(TestDTO.class, sheet);
 		assertFalse(st.cellContainsTemplateTag(sheet.getRow(4).getCell(2)));
+	}
+	
+	@Test
+	public void testDotInField() {
+		SheetTemplate st = new SheetTemplate(TestDTO.class, sheet);
+		assertTrue(st.cellContainsTemplateTag(sheet.getRow(4).getCell(15)));
+		assertFalse(st.cellContainsTemplateTag(sheet.getRow(4).getCell(16)));
 	}
 	
 	@Test
@@ -114,5 +132,5 @@ public class SheetTemplateTest {
 		assertEquals(4,st.getTemplateRowIndex());
 	}
 
-	// Add Test for Formula
+	// TODO: Add Test for Formula
 }

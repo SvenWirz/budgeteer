@@ -16,12 +16,11 @@ import com.google.common.collect.Multimap;
 
 public class SheetTemplate {
 
-	private static final Pattern pattern = Pattern.compile("\\{(\\w*)\\}");
+	private static final Pattern PATTERN = Pattern.compile("\\{([a-zA-Z0-9\\._]+)\\}");
 	
 	private Multimap<String,Integer> fieldMapping;
 
 	private Sheet sheet;
-	//private Row templateRow;
 	private int templateRowIndex;
 	private List<String> fieldList;
 	private Class<?> dtoClass;
@@ -43,7 +42,7 @@ public class SheetTemplate {
 	
 	private void processSheet() {
 		findTemplateRow();
-		mapFieldsToCells();
+		createFieldMapping();
 		checkForFlagTemplate();
 	}
 
@@ -56,7 +55,7 @@ public class SheetTemplate {
 		}
 	}
 
-	private void mapFieldsToCells() {
+	private void createFieldMapping() {
 		for(Cell cell : sheet.getRow(templateRowIndex)) { 
 			List<String> fields = mapCellValueToFieldNames(cell);
 			if(null != fields) {
@@ -98,14 +97,22 @@ public class SheetTemplate {
 	} else {
 		return null;
 	}
-	Matcher matcher = pattern.matcher(cellValue);
+	Matcher matcher = PATTERN.matcher(cellValue);
 	List<String> fields = new ArrayList<String>(matcher.groupCount());
 	while(matcher.find()) {
-		if(fieldList.contains(matcher.group(1))) {
+		if(dtoHasField(matcher.group(1))) {
 			fields.add(matcher.group(1));
 		}
 	}
 	return fields;
+	}
+
+	boolean dtoHasField(String group) {
+		if(group.charAt(0) == '.') {
+			return false;
+		}
+		String[] tokens = group.split("\\.");
+		return fieldList.contains(tokens[0]);
 	}
 
 	/**
@@ -141,4 +148,6 @@ public class SheetTemplate {
 	FlagTemplate getFlagTemplate() {
 		return flagTemplate;
 	}
+	
+	
 }
