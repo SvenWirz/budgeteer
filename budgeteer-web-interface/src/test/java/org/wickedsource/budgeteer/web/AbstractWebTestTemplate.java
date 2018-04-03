@@ -7,6 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.wickedsource.budgeteer.service.user.User;
 
+
 @RunWith(SpringRunner.class)
 @ContextConfiguration(locations = {"classpath:spring-web.xml", "classpath:spring-service-mock.xml"})
 public abstract class AbstractWebTestTemplate {
