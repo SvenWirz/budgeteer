@@ -2,12 +2,16 @@ package org.wickedsource.budgeteer.service.person;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.wickedsource.budgeteer.MoneyUtil;
+import org.wickedsource.budgeteer.boot.BudgeteerBooter;
 import org.wickedsource.budgeteer.persistence.person.PersonBaseDataBean;
 import org.wickedsource.budgeteer.persistence.person.PersonDetailDataBean;
 import org.wickedsource.budgeteer.persistence.person.PersonRepository;
-import org.wickedsource.budgeteer.service.ServiceTestTemplate;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -15,18 +19,20 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-public class PersonServiceTest extends ServiceTestTemplate {
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {BudgeteerBooter.class})
+public class PersonServiceTest {
 
     private Date fixedDate = new Date();
 
     @Autowired
     private PersonService personService;
 
-    @Autowired
+    @MockBean
     private PersonRepository personRepository;
 
     @Test
-    public void testLoadPeopleBaseData() throws Exception {
+    public void testLoadPeopleBaseData() {
         when(personRepository.findBaseDataByProjectId(1l)).thenReturn(Arrays.asList(createPersonBaseDataBean()));
         List<PersonBaseData> data = personService.loadPeopleBaseData(1l);
         Assert.assertEquals(1, data.size());
@@ -38,7 +44,7 @@ public class PersonServiceTest extends ServiceTestTemplate {
 
 
     @Test
-    public void testLoadPersonDetailData() throws Exception {
+    public void testLoadPersonDetailData() {
         when(personRepository.findDetailDataByPersonId(1l)).thenReturn(createPersonDetailDataBean());
         PersonDetailData data = personService.loadPersonDetailData(1l);
         Assert.assertEquals("person1", data.getName());
@@ -51,7 +57,7 @@ public class PersonServiceTest extends ServiceTestTemplate {
 
 
     @Test
-    public void testLoadPersonBaseData() throws Exception {
+    public void testLoadPersonBaseData() {
         when(personRepository.findBaseDataByPersonId(1l)).thenReturn(createPersonBaseDataBean());
         PersonBaseData bean = personService.loadPersonBaseData(1l);
         Assert.assertEquals(Long.valueOf(1), bean.getId());

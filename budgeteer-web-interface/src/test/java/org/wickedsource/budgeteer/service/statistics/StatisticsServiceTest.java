@@ -3,13 +3,17 @@ package org.wickedsource.budgeteer.service.statistics;
 import org.joda.money.Money;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.wickedsource.budgeteer.MoneyUtil;
+import org.wickedsource.budgeteer.boot.BudgeteerBooter;
 import org.wickedsource.budgeteer.persistence.record.*;
 import org.wickedsource.budgeteer.service.DateProvider;
 import org.wickedsource.budgeteer.service.DateUtil;
-import org.wickedsource.budgeteer.service.ServiceTestTemplate;
 import org.wickedsource.budgeteer.service.budget.BudgetTagFilter;
 
 import java.text.DateFormat;
@@ -19,17 +23,19 @@ import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-public class StatisticsServiceTest extends ServiceTestTemplate {
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {BudgeteerBooter.class})
+public class StatisticsServiceTest {
 
     private DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
 
-    @Autowired
+    @MockBean
     private WorkRecordRepository workRecordRepository;
 
-    @Autowired
+    @MockBean
     private PlanRecordRepository planRecordRepository;
 
-    @Autowired
+    @MockBean
     private DateProvider dateProvider;
 
     @Autowired
@@ -136,7 +142,7 @@ public class StatisticsServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testGetBudgetDistribution() throws Exception {
+    public void testGetBudgetDistribution() {
         when(workRecordRepository.getBudgetShareForPerson(1L)).thenReturn(createShares());
         List<Share> shares = service.getBudgetDistribution(1L);
         Assert.assertEquals(4, shares.size());
@@ -160,7 +166,7 @@ public class StatisticsServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testGetPeopleDistribution() throws Exception {
+    public void testGetPeopleDistribution() {
         when(workRecordRepository.getPersonShareForBudget(1L)).thenReturn(createShares());
         List<Share> shares = service.getPeopleDistribution(1L);
         Assert.assertEquals(4, shares.size());

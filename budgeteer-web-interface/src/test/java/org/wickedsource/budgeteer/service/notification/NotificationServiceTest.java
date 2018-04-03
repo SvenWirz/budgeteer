@@ -2,13 +2,17 @@ package org.wickedsource.budgeteer.service.notification;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.wickedsource.budgeteer.boot.BudgeteerBooter;
 import org.wickedsource.budgeteer.persistence.budget.BudgetRepository;
 import org.wickedsource.budgeteer.persistence.budget.MissingBudgetTotalBean;
 import org.wickedsource.budgeteer.persistence.record.MissingDailyRateBean;
 import org.wickedsource.budgeteer.persistence.record.MissingDailyRateForBudgetBean;
 import org.wickedsource.budgeteer.persistence.record.WorkRecordRepository;
-import org.wickedsource.budgeteer.service.ServiceTestTemplate;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -17,21 +21,23 @@ import java.util.List;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.when;
 
-public class NotificationServiceTest extends ServiceTestTemplate {
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {BudgeteerBooter.class})
+public class NotificationServiceTest {
 
     private Date fixedDate = new Date();
 
-    @Autowired
+    @MockBean
     private WorkRecordRepository workRecordRepository;
 
-    @Autowired
+    @MockBean
     private BudgetRepository budgetRepository;
 
     @Autowired
     private NotificationService service;
 
     @Test
-    public void testGetNotifications() throws Exception {
+    public void testGetNotifications() {
         when(workRecordRepository.getMissingDailyRatesForProject(1l)).thenReturn(Arrays.asList(createMissingDailyRate()));
         when(workRecordRepository.countByProjectId(anyLong())).thenReturn(0l, 0l);
         when(budgetRepository.getMissingBudgetTotalsForProject(1l)).thenReturn(Arrays.asList(createMissingBudgetTotal()));
@@ -41,7 +47,7 @@ public class NotificationServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testGetNotificationsForPerson() throws Exception {
+    public void testGetNotificationsForPerson() {
         when(workRecordRepository.getMissingDailyRatesForPerson(1l)).thenReturn(Arrays.asList(createMissingDailyRateForBudget()));
         List<Notification> notifications = service.getNotificationsForPerson(1l);
         Assert.assertEquals(1, notifications.size());
@@ -54,7 +60,7 @@ public class NotificationServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testGetNotificationsForBudget() throws Exception {
+    public void testGetNotificationsForBudget() {
         when(budgetRepository.getMissingBudgetTotalForBudget(1l)).thenReturn(createMissingBudgetTotal());
         List<Notification> notifications = service.getNotificationsForBudget(1l);
         Assert.assertEquals(1, notifications.size());

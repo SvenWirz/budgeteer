@@ -2,8 +2,13 @@ package org.wickedsource.budgeteer.service.budget;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.wickedsource.budgeteer.MoneyUtil;
+import org.wickedsource.budgeteer.boot.BudgeteerBooter;
 import org.wickedsource.budgeteer.persistence.budget.BudgetEntity;
 import org.wickedsource.budgeteer.persistence.budget.BudgetRepository;
 import org.wickedsource.budgeteer.persistence.budget.BudgetTagEntity;
@@ -12,35 +17,36 @@ import org.wickedsource.budgeteer.persistence.contract.ContractRepository;
 import org.wickedsource.budgeteer.persistence.person.DailyRateRepository;
 import org.wickedsource.budgeteer.persistence.record.PlanRecordRepository;
 import org.wickedsource.budgeteer.persistence.record.WorkRecordRepository;
-import org.wickedsource.budgeteer.service.ServiceTestTemplate;
 import org.wickedsource.budgeteer.service.contract.ContractBaseData;
 
 import java.util.*;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
-public class BudgetServiceTest extends ServiceTestTemplate {
-
-    @Autowired
-    private BudgetRepository budgetRepository;
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {BudgeteerBooter.class})
+public class BudgetServiceTest {
 
     @Autowired
     private BudgetService budgetService;
 
-    @Autowired
+    @MockBean
+    private BudgetRepository budgetRepository;
+
+    @MockBean
     private WorkRecordRepository workRecordRepository;
 
-    @Autowired
+    @MockBean
     private PlanRecordRepository planRecordRepository;
 
-    @Autowired
+    @MockBean
     private DailyRateRepository rateRepository;
 
-    @Autowired
+    @MockBean
     private ContractRepository contractRepository;
 
     @Test
-    public void testLoadBudgetBaseDataForProject() throws Exception {
+    public void testLoadBudgetBaseDataForProject() {
         when(budgetRepository.findByProjectIdOrderByNameAsc(1l)).thenReturn(Arrays.asList(createBudgetEntity()));
         List<BudgetBaseData> budgets = budgetService.loadBudgetBaseDataForProject(1l);
         Assert.assertEquals(1, budgets.size());
@@ -49,7 +55,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetBaseData() throws Exception {
+    public void testLoadBudgetBaseData() {
         when(budgetRepository.findOne(1l)).thenReturn(createBudgetEntity());
         BudgetBaseData data = budgetService.loadBudgetBaseData(1l);
         Assert.assertEquals(1l, data.getId());
@@ -57,7 +63,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetTags() throws Exception {
+    public void testLoadBudgetTags() {
         List<String> tags = new ArrayList<String>();
         tags.add("1");
         tags.add("2");
@@ -69,7 +75,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetDetailData() throws Exception {
+    public void testLoadBudgetDetailData() {
         Date date = new Date();
         when(budgetRepository.findOne(1l)).thenReturn(createBudgetEntity());
         when(workRecordRepository.getLatestWorkRecordDate(1l)).thenReturn(date);
@@ -83,7 +89,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetsDetailData() throws Exception {
+    public void testLoadBudgetsDetailData() {
         Date date = new Date();
         when(budgetRepository.findByAtLeastOneTag(1l, Arrays.asList("1", "2", "3"))).thenReturn(Arrays.asList(createBudgetEntity()));
         when(workRecordRepository.getLatestWorkRecordDate(1l)).thenReturn(date);
@@ -98,7 +104,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetToEdit() throws Exception {
+    public void testLoadBudgetToEdit() {
         BudgetEntity budget = createBudgetEntity();
         when(budgetRepository.findOne(1l)).thenReturn(budget);
         EditBudgetData data = budgetService.loadBudgetToEdit(1l);
@@ -112,7 +118,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testSaveBudget() throws Exception {
+    public void testSaveBudget() {
         BudgetEntity budget = createBudgetEntity();
         when(budgetRepository.findOne(1l)).thenReturn(budget);
 
@@ -134,7 +140,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testSaveBudgetWithContract() throws Exception {
+    public void testSaveBudgetWithContract() {
         BudgetEntity budget = createBudgetEntity();
         when(budgetRepository.findOne(1l)).thenReturn(budget);
 
@@ -170,7 +176,7 @@ public class BudgetServiceTest extends ServiceTestTemplate {
     }
 
     @Test
-    public void testLoadBudgetUnits() throws Exception {
+    public void testLoadBudgetUnits() {
         when(rateRepository.getDistinctRatesInCents(1l)).thenReturn(Arrays.asList(MoneyUtil.createMoney(100d), MoneyUtil.createMoney(200d)));
         List<Double> units = budgetService.loadBudgetUnits(1l);
         Assert.assertEquals(3, units.size());

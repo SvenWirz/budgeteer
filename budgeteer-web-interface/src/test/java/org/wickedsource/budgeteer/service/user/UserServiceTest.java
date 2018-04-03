@@ -2,12 +2,16 @@ package org.wickedsource.budgeteer.service.user;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.wickedsource.budgeteer.boot.BudgeteerBooter;
 import org.wickedsource.budgeteer.persistence.project.ProjectEntity;
 import org.wickedsource.budgeteer.persistence.project.ProjectRepository;
 import org.wickedsource.budgeteer.persistence.user.UserEntity;
 import org.wickedsource.budgeteer.persistence.user.UserRepository;
-import org.wickedsource.budgeteer.service.ServiceTestTemplate;
 import org.wickedsource.budgeteer.service.UnknownEntityException;
 
 import java.util.ArrayList;
@@ -16,12 +20,14 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-public class UserServiceTest extends ServiceTestTemplate{
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = {BudgeteerBooter.class})
+public class UserServiceTest {
 
-    @Autowired
+    @MockBean
     private UserRepository userRepository;
 
-    @Autowired
+    @MockBean
     private ProjectRepository projectRepository;
 
     @Autowired
